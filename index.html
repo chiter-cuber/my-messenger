@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Messenger</title>
+    <style>
+        :root { --bg: #121212; --panel: #1e1e1e; --text: #e0e0e0; --accent: #00bcd4; --border: #333; }
+        body { margin: 0; padding: 0; font-family: sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+        .sidebar { width: 280px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .logo { padding: 20px; font-weight: bold; color: var(--accent); font-size: 1.2rem; }
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { padding: 15px; cursor: pointer; border-bottom: 1px solid #2a2a2a; transition: 0.2s; }
+        .chat-item:hover { background: #2a2a2a; }
+        .chat-item.active { background: #333; border-left: 4px solid var(--accent); }
+        .chat-name { font-weight: 600; display: block; margin-bottom: 4px; }
+        .chat-preview { color: #aaa; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .main { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .header { padding: 15px; border-bottom: 1px solid var(--border); background: var(--panel); }
+        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 70%; padding: 10px 14px; border-radius: 12px; line-height: 1.4; }
+        .msg.mine { align-self: flex-end; background: var(--accent); color: #000; }
+        .msg.other { align-self: flex-start; background: #2a2a2a; color: #fff; }
+        .input-area { padding: 15px; background: var(--panel); display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; padding: 12px; background: #121212; border: 1px solid var(--border); color: white; border-radius: 8px; outline: none; }
+        button { padding: 12px 24px; background: var(--accent); border: none; color: black; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">MY MESS</div>
+        <div class="chat-list" id="chat-list">
+            <div class="chat-item active" onclick="selectChat('general', 'Общий чат')">
+                <span class="chat-name">Общий чат</span>
+                <span class="chat-preview">Добро пожаловать!</span>
+            </div>
+            <div class="chat-item" onclick="selectChat('m5stack', 'M5Stack Forest')">
+                <span class="chat-name">M5Stack Forest</span>
+                <span class="chat-preview">Данные с датчика</span>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="header"><span id="current-chat-name">Общий чат</span></div>
+        <div class="messages" id="messages"></div>
+        <div class="input-area">
+            <input type="text" id="username" placeholder="Твой ник" value="User1">
+            <input type="text" id="message-text" placeholder="Сообщение...">
+            <button onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+<script>
+    const SERVER_URL = ''; // Пусто, потому что работаем на том же домене
+    
+    let currentChatId = 'general';
+    let currentChatName = 'Общий чат';
+
+    function selectChat(chatId, name) {
+        currentChatId = chatId;
+        currentChatName = name;
+        document.getElementById('current-chat-name').innerText = name;
+        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+        event.target.closest('.chat-item').classList.add('active');
+        loadMessages();
+    }
+
+    async function loadMessages() {
+        try {
+            const res = await fetch(`${SERVER_URL}/api/messages?chat_id=${currentChatId}`);
+            const data = await res.json();
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
+            data.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'msg ' + (msg.username === document.getElementById('username').value ? 'mine' : 'other');
+                div.innerText = `[${msg.username}] ${msg.text}`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function sendMessage() {
+        const user = document.getElementById('username').value;
+        const text = document.getElementById('message-text').value;
+        if (!text) return;
+        try {
+            await fetch(`${SERVER_URL}/api/send_message`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: user, text: text, chat_id: currentChatId})
+            });
+            loadMessages();
+            document.getElementById('message-text').value = '';
+        } catch (e) {
+            alert('Ошибка отправки');
+        }
+    }
+
+    loadMessages();
+</script>
+</body>
+</html>
