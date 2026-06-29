@@ -49,9 +49,6 @@ def send_message():
 
 @app.route('/')
 def index():
-    with open('index.html', 'r', encoding='utf-8') as f:
-        return f.read()
+    # ПРАВИЛЬНО: отдаём шаблон через render_template, он сам ищет его в папке templates/
+    return render_template('index.html')
 
-if __name__ == '__main__':
-    init_db()
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
