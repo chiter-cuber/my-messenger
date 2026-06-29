@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template
 import sqlite3
 import os
-
+                                                    
 app = Flask(__name__)
 DB_NAME = 'chat.db'
 
