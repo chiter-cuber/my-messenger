@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        /* Гарантируем, что высота не будет "прыгать" при появлении клавиатуры */
+        overscroll-behavior: none; 
+    }
+
+    /* Хак для iOS/Android: используем безопасную зону, чтобы контент не наезжал на кнопки браузера */
+    @supports (padding-top: env(safe-area-inset-top)) {
+        body {
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: env(safe-area-inset-top);
+        }
+    }
+    
+    /* Если у тебя есть контейнер для всего приложения (например, #app), 
+       принудительно растягиваем его на всю высоту */
+    #app, .main-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Messenger</title>
