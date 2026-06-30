@@ -1,161 +1,14 @@
-    <!-- ... (предыдущий код сайдбара и области сообщений оставь как есть) ... -->
-
-    <!-- ИСПРАВЛЕННАЯ ПАНЕЛЬ ВВОДА -->
-    <div class="input-area flex items-center gap-3 p-4 bg-gray-900/30 backdrop-blur-sm border-t border-white/10">
-        
-        <!-- Поле имени (только для чтения) -->
-        <input type="text" id="username" value="User1" class="w-32 bg-white/20 border border-white/20 text-white rounded-lg px-3 py-2 text-sm font-mono uppercase tracking-wider" readonly>
-        
-        <!-- Поле сообщения (основное) -->
-        <input type="text" id="message" placeholder="Сообщение..." class="flex-1 bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400 transition" autocomplete="off">
-        
-        <!-- Кнопка отправки (ОДНА!) -->
-        <button onclick="sendMessage()" class="custom-btn h-12 w-12 flex items-center justify-center rounded-full shadow-none">
-            ➤
-        </button>
-    </div>
-</div> <!-- Закрывающий div для всего чата -->
-
-<script>
-    function sendMessage() {
-        const messageInput = document.getElementById('message');
-        const text = messageInput.value.trim();
-        if (!text) return;
-
-        console.log("Отправка сообщения:", text);
-        // Тут будет твой код отправки на сервер
-        
-        messageInput.value = '';
-    }
-</script>
-</body>
-</html>
-
-<body>                            
-    <div class="sidebar">
-        <div class="logo">MY MESS</div>
-        <div class="chat-list" id="chat-list">
-            <div class="chat-item active" onclick="selectChat('general', 'Общий чат')">
-                <span class="chat-name">Общий чат</span>
-                <span class="chat-preview">Добро пожаловать!</span>
-            </div>
-            <div class="chat-item" onclick="selectChat('m5stack', 'M5Stack Forest')">
-                <span class="chat-name">M5Stack Forest</span>
-                <span class="chat-preview">Данные с датчика</span>
-            </div>
-        </div>
-    </div>
-    <div class="main">
-        <div class="header"><span id="current-chat-name">Общий чат</span></div>
-        <div class="main">
-    <div class="header">Чат с {{ selected_chat or 'общим каналом' }}</div>
-    
-    <div class="messages" id="messages">
-        {% for message in messages %}
-            <div class="message {% if message.sender == 'user' %}user{% else %}system{% endif %}">
-                {{ message.text }}
-            </div>
-        {% endfor %}
-    </div>
-
-    <div class="input-area">
-        <input type="text" id="username" value="User1" placeholder="Ваше имя" readonly>
-        <input type="text" id="message" placeholder="Сообщение...">
-        <button onclick="sendMessage()">➤</button>
-    </div>
-</div>
-
-        <div class="input-area">
-            <input type="text" id="username" placeholder="Твой ник" value="User1">
-            <input type="text" id="message-text" placeholder="Сообщение...">
-            <button onclick="sendMessage()">➤</button>
-        </div>
-    </div>
-
-<script>
-    const SERVER_URL = ''; // Пусто, потому что работаем на том же домене
-    
-    let currentChatId = 'general';
-    let currentChatName = 'Общий чат';
-
-    function selectChat(chatId, name) {
-        currentChatId = chatId;
-        currentChatName = name;
-        document.getElementById('current-chat-name').innerText = name;
-        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
-        event.target.closest('.chat-item').classList.add('active');
-        loadMessages();
-    }
-
-    async function loadMessages() {
-        try {
-            const res = await fetch(`${SERVER_URL}/api/messages?chat_id=${currentChatId}`);
-            const data = await res.json();
-            const container = document.getElementById('messages');
-            container.innerHTML = '';
-            data.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = 'msg ' + (msg.username === document.getElementById('username').value ? 'mine' : 'other');
-                div.innerText = `[${msg.username}] ${msg.text}`;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    async function sendMessage() {
-        const user = document.getElementById('username').value;
-        const text = document.getElementById('message-text').value;
-        if (!text) return;
-        try {
-            await fetch(`${SERVER_URL}/api/send_message`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: user, text: text, chat_id: currentChatId})
-            });
-            loadMessages();
-            document.getElementById('message-text').value = '';
-        } catch (e) {
-            alert('Ошибка отправки');
-        }
-    }
-
-    loadMessages();
-</script>
-</body>
-</html>
-<div class="main">
-    <div class="header">Чат с {{ selected_chat or 'общим каналом' }}</div>
-    
-    <div class="messages" id="messages">
-        {% for message in messages %}
-            <div class="message {% if message.sender == 'user' %}user{% else %}system{% endif %}">
-                {{ message.text }}
-            </div>
-        {% endfor %}
-    </div>
-
-    <div class="input-area">
-        <input type="text" id="username" value="User1" placeholder="Ваше имя" readonly>
-        <input type="text" id="message" placeholder="Сообщение...">
-        <button onclick="sendMessage()">➤</button>
-    </div>
-</div>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- КРИТИЧЕСКИ ВАЖНО: эта строка заставляет сайт думать, что он на мобильном -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Messenger</title>
-
-    <!-- Подключаем шрифт IBM Plex Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Tailwind CSS (для базовой сетки и удобства) -->
+    
+    <!-- Шрифт -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -167,10 +20,11 @@
             justify-content: center;
             align-items: center;
             font-family: 'IBM Plex Sans', sans-serif;
-            color: #1a1a2e;
+            color: white;
+            overflow-x: hidden; /* Убирает горизонтальный скролл */
         }
 
-        /* --- ТВОЙ СТИЛЬ КНОПКИ --- */
+        /* Стиль кнопки */
         .custom-btn {
             width: auto;
             height: 48px;
@@ -180,125 +34,93 @@
             font-size: 16px;
             font-weight: 600;
             border-radius: 8px;
-            padding: 12px 24px;
+            padding: 0 24px;
             transition: all 0.3s ease;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             border: none;
-            box-shadow: 0 4px 12px rgba(56, 79, 255, 0.3);
+            box-shadow: 0 4px 14px rgba(56, 79, 255, 0.4);
         }
+
         .custom-btn:hover {
             transform: translateY(-3px);
             background: #e94560;
             color: #ffffff;
-            box-shadow: 0 6px 16px rgba(233, 69, 96, 0.4);
+            box-shadow: 0 6px 20px rgba(233, 69, 96, 0.5);
         }
+
         .custom-btn:active {
             transform: scale(0.96);
-        }
-
-        /* --- ТВОЙ БЛОК С УГЛАМИ --- */
-        .box {
-            border-radius: 107px;
-            border: 2px solid #000000;
-            background: #66e0ff;
-            padding: 20px;
-            height: 200px;
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #1a1a2e;
-            text-align: center;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-        .box span {
-            font-weight: 600;
-            margin-top: 8px;
-            font-size: 0.9rem;
-            color: #000;
-        }
-
-        /* Тонкие правки для общего стиля */
-        .chat-window {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
         }
     </style>
 </head>
 <body>
 
-    <!-- Основное окно чата -->
-    <div class="w-full max-w-5xl h-screen flex chat-window bg-white/10 rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+    <!-- ГЛАВНЫЙ КОНТЕЙНЕР -->
+    <!-- max-w-4xl = макс ширина 512px (идеально для чата). 
+         h-screen = на телефоне занимает почти весь экран. 
+         hidden md:flex = на телефоне это просто блок, на ПК становится строкой -->
+    <div class="w-full max-w-4xl h-screen flex flex-col md:flex-row bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden border border-white/20">
         
-        <!-- ЛЕВАЯ ЧАСТЬ: Сайдбар -->
-        <div class="w-72 bg-gray-900 text-white p-4 flex flex-col gap-4 border-r border-gray-800">
-            <h2 class="text-xl font-bold text-indigo-400 mb-4">Чаты</h2>
+        <!-- ЛЕВАЯ ЧАСТЬ (Сайдбар) -->
+        <!-- hidden md:block = СКРЫТ на мобильных, ВИДЕН на ПК (начиная с 768px) -->
+        <div class="w-full md:w-64 bg-gray-900/90 text-gray-300 p-4 flex flex-col gap-2 hidden md:block">
+            <h2 class="text-xl font-bold text-indigo-400 border-b pb-2">MY MESS</h2>
             
-            <!-- Пример чата (можно потом сделать циклом) -->
-            <div class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition cursor-pointer border border-gray-700">
-                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">О</div>
-                <div>
-                    <div class="font-semibold">Общий канал</div>
-                    <div class="text-xs text-gray-400">Последнее сообщение...</div>
-                </div>
+            <div class="flex items-center gap-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span>Общий чат</span>
             </div>
-
-            <div class="mt-auto">
-                <p class="text-xs text-gray-500 mt-8">Настройки профиля<br>и прочее меню</p>
+            <div class="flex items-center gap-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
+                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span>M5Stack Forest</span>
+            </div>
+            <div class="flex items-center gap-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700">
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <span>Данные с датчика</span>
             </div>
         </div>
 
-        <!-- ПРАВАЯ ЧАСТЬ: Область чата -->
-        <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-md border-l border-white/10">
+        <!-- ПРАВАЯ ЧАСТЬ (Чат) -->
+        <!-- flex-1 = занимает все свободное место -->
+        <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-sm border-l border-white/10 overflow-hidden">
             
-            <div class="p-5 border-b border-white/10 flex items-center gap-3">
-                <h3 class="text-lg font-bold text-white">Чат с общим каналом</h3>
-                <span class="px-2 py-1 bg-green-500/20 text-xs text-green-200 rounded-full border border-green-500/30">Онлайн</span>
+            <!-- Заголовок чата -->
+            <div class="p-4 border-b border-white/10 flex items-center justify-between bg-gray-900/20">
+                <h3 class="text-lg font-bold text-white">Общий чат</h3>
+                <span class="text-xs text-gray-400">Онлайн: 12</span>
             </div>
 
-            <!-- Область сообщений -->
-            <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-900/10 rounded-b-none">
-                
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="flex flex-col gap-1">
-                            {% if message.sender == 'user' %}
-                                <!-- Сообщение пользователя (справа) -->
-                                <div class="max-w-[70%] ml-auto p-4 bg-white text-gray-800 rounded-2xl shadow-sm border border-gray-100">
-                                    <div class="text-xs font-bold text-gray-500 mb-1">Вы</div>
-                                    <div>{{ message.text }}</div>
-                                </div>
-                            {% else %}
-                                <!-- Сообщение системы (слева) -->
-                                <div class="max-w-[70%] mr-auto p-4 bg-gray-200 text-gray-800 rounded-2xl border border-gray-100">
-                                    <div class="text-xs font-bold text-gray-500 mb-1">Бот</div>
-                                    <div>{{ message.text }}</div>
-                                </div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <!-- Если сообщений нет — показываем ТВОЙ блок с углами -->
-                    <div class="flex justify-center items-center h-full">
-                        <div class="box">
-                            <span>Добро пожаловать в чат!</span>
-                            <span>Напишите первое сообщение — и этот блок исчезнет</span>
-                        </div>
+            <!-- Область сообщений (скроллится только она) -->
+            <div id="messages-area" class="flex-1 p-4 overflow-y-auto space-y-3 pb-20">
+                <!-- Пример сообщения от бота -->
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs text-white font-bold">AI</div>
+                    <div class="bg-gray-200 text-gray-800 text-sm rounded-xl p-3 max-w-xs">
+                        Привет! Теперь на телефоне сайдбара нет, а чат занимает весь экран.
                     </div>
-                {% endif %}
+                </div>
+                <!-- Пример сообщения от пользователя -->
+                <div class="flex gap-3 justify-end">
+                    <div class="bg-white text-gray-800 text-sm rounded-xl p-3 max-w-xs">
+                        Ура! Выглядит как настоящее приложение!
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-400"></div>
+                </div>
             </div>
 
-            <!-- Панель ввода -->
-            <div class="p-4 bg-gray-900/20 border-t border-white/10">
-                <div class="flex gap-3 items-end">
-                    <input type="text" id="username" value="User1" class="flex-1 bg-white/20 border border-white/30 text-white rounded-lg px-4 py-3 placeholder-gray-400 focus:border-indigo-400 outline-none" readonly>
-                    <input type="text" id="message" placeholder="Введите сообщение..." class="flex-1 bg-white/20 border border-white/30 text-white rounded-lg px-4 py-3 placeholder-gray-400 focus:border-indigo-400 outline-none autocomplete="off">
+            <!-- Панель ввода (всегда внизу) -->
+            <div class="p-4 bg-gray-900/50 border-t border-white/10 absolute bottom-0 left-0 w-full">
+                <div class="flex gap-3 items-center bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/20">
+                    <!-- Поле имени (readonly + autocomplete off) -->
+                    <input type="text" id="username" value="User1" class="w-20 bg-white/20 border border-white/20 text-white rounded-lg px-3 py-2 text-xs uppercase tracking-wider readonly" readonly autocomplete="off">
+                    
+                    <!-- Поле сообщения -->
+                    <input type="text" id="message" placeholder="Введите сообщение..." class="flex-1 bg-transparent text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400 transition" autocomplete="off">
+                    
+                    <!-- Кнопка -->
                     <button onclick="sendMessage()" class="custom-btn">
                         ➤
                     </button>
@@ -311,15 +133,35 @@
         function sendMessage() {
             const messageInput = document.getElementById('message');
             const usernameInput = document.getElementById('username');
+            const messagesArea = document.getElementById('messages-area');
+            
             const text = messageInput.value.trim();
             if (!text) return;
 
-            // Тут будет логика отправки на сервер (fetch/post)
-            console.log("Отправка:", text, "от:", usernameInput.value);
-
+            // Создаем новое сообщение
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex gap-3 justify-end';
+            
+            msgDiv.innerHTML = `
+                <div class="bg-white text-gray-800 text-sm rounded-xl p-3 max-w-xs">
+                    \${text}
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gray-400"></div>
+            `;
+            
+            messagesArea.appendChild(msgDiv);
             messageInput.value = '';
-            // Если нужно, можно добавить сообщение в DOM вручную, пока сервер не отвечает
+            
+            // Прокрутка вниз к новому сообщению
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Автопрокрутка при загрузке
+        const messagesArea = document.getElementById('messages-area');
+        if(messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
         }
     </script>
 </body>
 </html>
+
