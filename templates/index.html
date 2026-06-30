@@ -23,7 +23,24 @@
     </div>
     <div class="main">
         <div class="header"><span id="current-chat-name">Общий чат</span></div>
-        <div class="messages" id="messages"></div>
+        <div class="main">
+    <div class="header">Чат с {{ selected_chat or 'общим каналом' }}</div>
+    
+    <div class="messages" id="messages">
+        {% for message in messages %}
+            <div class="message {% if message.sender == 'user' %}user{% else %}system{% endif %}">
+                {{ message.text }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="username" value="User1" placeholder="Ваше имя" readonly>
+        <input type="text" id="message" placeholder="Сообщение...">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
         <div class="input-area">
             <input type="text" id="username" placeholder="Твой ник" value="User1">
             <input type="text" id="message-text" placeholder="Сообщение...">
