@@ -1,13 +1,37 @@
-<!DOCTYPE html>
-                                                           
-<html lang="ru">
-<head>         
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Messenger</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">                                                                                                                                                                                                                                                                 
-</head>     
-<body>
+    <!-- ... (предыдущий код сайдбара и области сообщений оставь как есть) ... -->
+
+    <!-- ИСПРАВЛЕННАЯ ПАНЕЛЬ ВВОДА -->
+    <div class="input-area flex items-center gap-3 p-4 bg-gray-900/30 backdrop-blur-sm border-t border-white/10">
+        
+        <!-- Поле имени (только для чтения) -->
+        <input type="text" id="username" value="User1" class="w-32 bg-white/20 border border-white/20 text-white rounded-lg px-3 py-2 text-sm font-mono uppercase tracking-wider" readonly>
+        
+        <!-- Поле сообщения (основное) -->
+        <input type="text" id="message" placeholder="Сообщение..." class="flex-1 bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-indigo-400 transition" autocomplete="off">
+        
+        <!-- Кнопка отправки (ОДНА!) -->
+        <button onclick="sendMessage()" class="custom-btn h-12 w-12 flex items-center justify-center rounded-full shadow-none">
+            ➤
+        </button>
+    </div>
+</div> <!-- Закрывающий div для всего чата -->
+
+<script>
+    function sendMessage() {
+        const messageInput = document.getElementById('message');
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        console.log("Отправка сообщения:", text);
+        // Тут будет твой код отправки на сервер
+        
+        messageInput.value = '';
+    }
+</script>
+</body>
+</html>
+
+<body>                            
     <div class="sidebar">
         <div class="logo">MY MESS</div>
         <div class="chat-list" id="chat-list">
