@@ -119,3 +119,183 @@
         <button onclick="sendMessage()">➤</button>
     </div>
 </div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messenger</title>
+
+    <!-- Подключаем шрифт IBM Plex Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (для базовой сетки и удобства) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(159, 39, 219, 1) 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'IBM Plex Sans', sans-serif;
+            color: #1a1a2e;
+        }
+
+        /* --- ТВОЙ СТИЛЬ КНОПКИ --- */
+        .custom-btn {
+            width: auto;
+            height: 48px;
+            background: #384fff;
+            color: #1a1a2e;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 4px 12px rgba(56, 79, 255, 0.3);
+        }
+        .custom-btn:hover {
+            transform: translateY(-3px);
+            background: #e94560;
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(233, 69, 96, 0.4);
+        }
+        .custom-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* --- ТВОЙ БЛОК С УГЛАМИ --- */
+        .box {
+            border-radius: 107px;
+            border: 2px solid #000000;
+            background: #66e0ff;
+            padding: 20px;
+            height: 200px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        .box span {
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #000;
+        }
+
+        /* Тонкие правки для общего стиля */
+        .chat-window {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Основное окно чата -->
+    <div class="w-full max-w-5xl h-screen flex chat-window bg-white/10 rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+        
+        <!-- ЛЕВАЯ ЧАСТЬ: Сайдбар -->
+        <div class="w-72 bg-gray-900 text-white p-4 flex flex-col gap-4 border-r border-gray-800">
+            <h2 class="text-xl font-bold text-indigo-400 mb-4">Чаты</h2>
+            
+            <!-- Пример чата (можно потом сделать циклом) -->
+            <div class="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition cursor-pointer border border-gray-700">
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">О</div>
+                <div>
+                    <div class="font-semibold">Общий канал</div>
+                    <div class="text-xs text-gray-400">Последнее сообщение...</div>
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                <p class="text-xs text-gray-500 mt-8">Настройки профиля<br>и прочее меню</p>
+            </div>
+        </div>
+
+        <!-- ПРАВАЯ ЧАСТЬ: Область чата -->
+        <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-md border-l border-white/10">
+            
+            <div class="p-5 border-b border-white/10 flex items-center gap-3">
+                <h3 class="text-lg font-bold text-white">Чат с общим каналом</h3>
+                <span class="px-2 py-1 bg-green-500/20 text-xs text-green-200 rounded-full border border-green-500/30">Онлайн</span>
+            </div>
+
+            <!-- Область сообщений -->
+            <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-900/10 rounded-b-none">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="flex flex-col gap-1">
+                            {% if message.sender == 'user' %}
+                                <!-- Сообщение пользователя (справа) -->
+                                <div class="max-w-[70%] ml-auto p-4 bg-white text-gray-800 rounded-2xl shadow-sm border border-gray-100">
+                                    <div class="text-xs font-bold text-gray-500 mb-1">Вы</div>
+                                    <div>{{ message.text }}</div>
+                                </div>
+                            {% else %}
+                                <!-- Сообщение системы (слева) -->
+                                <div class="max-w-[70%] mr-auto p-4 bg-gray-200 text-gray-800 rounded-2xl border border-gray-100">
+                                    <div class="text-xs font-bold text-gray-500 mb-1">Бот</div>
+                                    <div>{{ message.text }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Если сообщений нет — показываем ТВОЙ блок с углами -->
+                    <div class="flex justify-center items-center h-full">
+                        <div class="box">
+                            <span>Добро пожаловать в чат!</span>
+                            <span>Напишите первое сообщение — и этот блок исчезнет</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Панель ввода -->
+            <div class="p-4 bg-gray-900/20 border-t border-white/10">
+                <div class="flex gap-3 items-end">
+                    <input type="text" id="username" value="User1" class="flex-1 bg-white/20 border border-white/30 text-white rounded-lg px-4 py-3 placeholder-gray-400 focus:border-indigo-400 outline-none" readonly>
+                    <input type="text" id="message" placeholder="Введите сообщение..." class="flex-1 bg-white/20 border border-white/30 text-white rounded-lg px-4 py-3 placeholder-gray-400 focus:border-indigo-400 outline-none autocomplete="off">
+                    <button onclick="sendMessage()" class="custom-btn">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const usernameInput = document.getElementById('username');
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Тут будет логика отправки на сервер (fetch/post)
+            console.log("Отправка:", text, "от:", usernameInput.value);
+
+            messageInput.value = '';
+            // Если нужно, можно добавить сообщение в DOM вручную, пока сервер не отвечает
+        }
+    </script>
+</body>
+</html>
