@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Мой Чат</title>
+    
+    <!-- СТИЛИ ВНУТРИ ФАЙЛА — они не пропадут -->
+    <style>
+      body { font-family: system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+      .chat-box {
+        max-width: 500px; margin: 0 auto;
+        background: #fff; border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex; flex-direction: column; height: 75vh;
+      }
+      #messages {
+        flex: 1; padding: 15px; overflow-y: auto;
+        background: #fafafa;
+      }
+      .msg {
+        padding: 10px 14px; border-radius: 16px;
+        margin-bottom: 8px; word-wrap: break-word;
+      }
+      .user { background: #d4edda; margin-left: auto; text-align: right; }
+      .bot  { background: #e9ecef; margin-right: auto; text-align: left; }
+      
+      .input-row { padding: 10px; background: #fff; display: flex; gap: 10px; border-top: 1px solid #eee; }
+      input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 24px; outline: none; }
+      button { padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 24px; cursor: pointer; }
+      button:hover { background: #0056b3; }
+    </style>
+  </head>
+  <body>
+
+    <div class="chat-box">
+      <div id="messages"></div>
+      <div class="input-row">
+        <input id="msgInput" type="text" placeholder="Напиши сообщение...">
+        <button id="sendBtn">➤</button>
+      </div>
+    </div>
+
+    <!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+
+    <script>
+      // !!! ВСТАВЬ СЮДА СВОИ ДАННЫЕ ИЗ FIREBASE !!!
+      const firebaseConfig = {
+        apiKey: "ТВОЙ_API_KEY",
+        authDomain: "ТВОЙ_PROJECT.firebaseapp.com",
+        databaseURL: "https://ТВОЙ-PROJECT-default-rtdb.firebaseio.com",
+        projectId: "ТВОЙ_PROJECT",
+        storageBucket: "ТВОЙ_PROJECT.appspot.com",
+        messagingSenderId: "ТВОЙ_SENDER_ID",
+        appId: "ТВОЙ_APP_ID"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase();
+
+      const messagesDiv = document.getElementById('messages');
+      const msgInput = document.getElementById('msgInput');
+      const sendBtn = document.getElementById('sendBtn');
+
+      function sendMessage() {
+        const text = msgInput.value.trim();
+        if (!text) return;
+
+        const newPostKey = push(ref(db, 'messages')).key;
+        const updates = {};
+        updates['/messages/' + newPostKey] = { text: text, sender: 'user', time: Date.now() };
+
+        update(ref(db), updates)
+          .then(() => msgInput.value = '')
+          .catch(err => console.error(err));
+      }
+
+      sendBtn.addEventListener('click', sendMessage);
+      msgInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') sendMessage();
+      });
+
+      onValue(ref(db, 'messages'), (snapshot) => {
+        messagesDiv.innerHTML = '';
+        snapshot.forEach((child) => {
+          const data = child.val();
+          const div = document.createElement('div');
+          div.className = 'msg ' + data.sender;
+          div.textContent = data.text;
+          messagesDiv.appendChild(div);
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+      });
+    </script>
+  </body>
+</html>
