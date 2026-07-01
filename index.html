@@ -3,31 +3,72 @@
   <head>
     <meta charset="UTF-8">
     <title>Мой Чат</title>
-    
-    <!-- СТИЛИ ВНУТРИ ФАЙЛА — они не пропадут -->
+
+    <!-- СТИЛИ (всё красивое здесь, чтобы точно не пропало) -->
     <style>
-      body { font-family: system-ui, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+      }
       .chat-box {
-        max-width: 500px; margin: 0 auto;
-        background: #fff; border-radius: 12px;
+        max-width: 500px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        display: flex; flex-direction: column; height: 75vh;
+        display: flex;
+        flex-direction: column;
+        height: 75vh;
       }
       #messages {
-        flex: 1; padding: 15px; overflow-y: auto;
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
         background: #fafafa;
       }
       .msg {
-        padding: 10px 14px; border-radius: 16px;
-        margin-bottom: 8px; word-wrap: break-word;
+        padding: 10px 14px;
+        border-radius: 16px;
+        margin-bottom: 8px;
+        word-wrap: break-word;
       }
-      .user { background: #d4edda; margin-left: auto; text-align: right; }
-      .bot  { background: #e9ecef; margin-right: auto; text-align: left; }
-      
-      .input-row { padding: 10px; background: #fff; display: flex; gap: 10px; border-top: 1px solid #eee; }
-      input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 24px; outline: none; }
-      button { padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 24px; cursor: pointer; }
-      button:hover { background: #0056b3; }
+      .user {
+        background: #d4edda;
+        margin-left: auto;
+        text-align: right;
+      }
+      .bot {
+        background: #e9ecef;
+        margin-right: auto;
+        text-align: left;
+      }
+      .input-row {
+        padding: 10px;
+        background: #fff;
+        display: flex;
+        gap: 10px;
+        border-top: 1px solid #eee;
+      }
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 24px;
+        outline: none;
+      }
+      button {
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
     </style>
   </head>
   <body>
@@ -40,12 +81,12 @@
       </div>
     </div>
 
-    <!-- ПОДКЛЮЧЕНИЕ FIREBASE -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
 
     <script>
-      // !!! ВСТАВЬ СЮДА СВОИ ДАННЫЕ ИЗ FIREBASE !!!
+      // !!! ВСТАВЬ СЮДА СВОИ ДАННЫЕ ИЗ FIREBASE CONSOLE !!!
       const firebaseConfig = {
         apiKey: "ТВОЙ_API_KEY",
         authDomain: "ТВОЙ_PROJECT.firebaseapp.com",
