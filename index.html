@@ -3,90 +3,107 @@
   <head>
     <meta charset="UTF-8">
     <title>Мой Чат</title>
-
-    <!-- СТИЛИ (всё красивое здесь, чтобы точно не пропало) -->
     <style>
+      :root {
+        --bg-color: #f3f4f6;
+        --chat-bg: #ffffff;
+        --user-msg-bg: #dcf8c6;
+        --bot-msg-bg: #e9e9eb;
+        --accent: #007bff;
+        --text-main: #333;
+      }
       body {
-        font-family: system-ui, sans-serif;
-        background: #f0f2f5;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg-color);
         margin: 0;
         padding: 20px;
+        color: var(--text-main);
       }
-      .chat-box {
-        max-width: 500px;
+      .chat-container {
+        max-width: 560px;
         margin: 0 auto;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: var(--chat-bg);
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        height: 75vh;
+        height: 80vh;
       }
       #messages {
         flex: 1;
-        padding: 15px;
+        padding: 20px;
         overflow-y: auto;
         background: #fafafa;
       }
-      .msg {
-        padding: 10px 14px;
-        border-radius: 16px;
-        margin-bottom: 8px;
+      .message {
+        margin-bottom: 12px;
+        padding: 12px 16px;
+        border-radius: 18px;
+        max-width: 82%;
         word-wrap: break-word;
+        line-height: 1.4;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
       }
-      .user {
-        background: #d4edda;
+      .message.user {
+        background: var(--user-msg-bg);
         margin-left: auto;
         text-align: right;
+        border-bottom-right-radius: 4px;
       }
-      .bot {
-        background: #e9ecef;
+      .message.bot {
+        background: var(--bot-msg-bg);
         margin-right: auto;
         text-align: left;
+        border-bottom-left-radius: 4px;
       }
-      .input-row {
-        padding: 10px;
-        background: #fff;
+      .input-area {
+        padding: 12px;
+        background: white;
+        border-top: 1px solid #e0e0e0;
         display: flex;
         gap: 10px;
-        border-top: 1px solid #eee;
       }
-      input {
+      input[type="text"] {
         flex: 1;
-        padding: 12px;
-        border: 1px solid #ccc;
+        padding: 12px 16px;
+        border: 1px solid #d1d5db;
         border-radius: 24px;
         outline: none;
+        transition: border-color 0.2s;
       }
-      button {
-        padding: 12px 20px;
-        background: #007bff;
+      input[type="text"]:focus {
+        border-color: var(--accent);
+      }
+      button#sendBtn {
+        padding: 0 22px;
+        background: var(--accent);
         color: white;
         border: none;
         border-radius: 24px;
         cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s, transform 0.1s;
       }
-      button:hover {
+      button#sendBtn:hover {
         background: #0056b3;
+      }
+      button#sendBtn:active {
+        transform: scale(0.98);
       }
     </style>
   </head>
   <body>
-
-    <div class="chat-box">
+    <div class="chat-container">
       <div id="messages"></div>
-      <div class="input-row">
-        <input id="msgInput" type="text" placeholder="Напиши сообщение...">
+      <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Сообщение...">
         <button id="sendBtn">➤</button>
       </div>
     </div>
-
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-
     <script>
-      // !!! ВСТАВЬ СЮДА СВОИ ДАННЫЕ ИЗ FIREBASE CONSOLE !!!
       const firebaseConfig = {
         apiKey: "ТВОЙ_API_KEY",
         authDomain: "ТВОЙ_PROJECT.firebaseapp.com",
@@ -96,38 +113,31 @@
         messagingSenderId: "ТВОЙ_SENDER_ID",
         appId: "ТВОЙ_APP_ID"
       };
-
       const app = initializeApp(firebaseConfig);
       const db = getDatabase();
-
       const messagesDiv = document.getElementById('messages');
       const msgInput = document.getElementById('msgInput');
       const sendBtn = document.getElementById('sendBtn');
-
       function sendMessage() {
         const text = msgInput.value.trim();
         if (!text) return;
-
         const newPostKey = push(ref(db, 'messages')).key;
         const updates = {};
-        updates['/messages/' + newPostKey] = { text: text, sender: 'user', time: Date.now() };
-
+        updates['/messages/' + newPostKey] = { text: text, sender: 'user', timestamp: Date.now() };
         update(ref(db), updates)
           .then(() => msgInput.value = '')
-          .catch(err => console.error(err));
+          .catch(console.error);
       }
-
       sendBtn.addEventListener('click', sendMessage);
       msgInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') sendMessage();
       });
-
       onValue(ref(db, 'messages'), (snapshot) => {
         messagesDiv.innerHTML = '';
-        snapshot.forEach((child) => {
-          const data = child.val();
+        snapshot.forEach((childSnapshot) => {
+          const data = childSnapshot.val();
           const div = document.createElement('div');
-          div.className = 'msg ' + data.sender;
+          div.className = 'message ' + (data.sender === 'user' ? 'user' : 'bot');
           div.textContent = data.text;
           messagesDiv.appendChild(div);
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
